@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'Kanit';
+    src: url(./font/Kanit/Kanit-Regular.ttf) format('ttf');
+    font-style: normal
+}
+
+*{
+    font-family: 'Kanit', sans-serif;
+}
+
+@import 'tailwindcss';
+@plugin 'daisyui'{
+    themes: cupcake --default
+}
