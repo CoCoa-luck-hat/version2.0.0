@@ -18,7 +18,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+
+      # Cache Frontend dependencies
+      - name: Cache frontend node modules
+        uses: actions/cache@v4
+        with:
+          path: Font-End/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('Font-End/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-frontend-
 
       # Frontend build
       - name: Install frontend deps
@@ -28,6 +36,15 @@ jobs:
       - name: Build frontend
         working-directory: Font-End
         run: npm run build
+
+      # Cache Backend dependencies
+      - name: Cache backend node modules
+        uses: actions/cache@v4
+        with:
+          path: Back-End/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('Back-End/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-backend-
 
       # Backend deps
       - name: Install backend deps
@@ -46,10 +63,20 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+
+      # Cache Frontend dependencies
+      - name: Cache frontend node modules
+        uses: actions/cache@v4
+        with:
+          path: Font-End/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('Font-End/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-frontend-
 
       - name: Frontend tests
         working-directory: Font-End
@@ -57,6 +84,15 @@ jobs:
           npm ci
           npm run test --if-present
           npm run lint --if-present
+
+      # Cache Backend dependencies
+      - name: Cache backend node modules
+        uses: actions/cache@v4
+        with:
+          path: Back-End/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('Back-End/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-backend-
 
       - name: Backend tests
         working-directory: Back-End
