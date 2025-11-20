@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  NODE_VERSION: 20
+  NODE_VERSION: 22
 
 jobs:
   build:
@@ -34,7 +34,7 @@ jobs:
         working-directory: Back-End
         run: npm ci
 
-      # Build Docker images for later reuse
+      # Build Docker images
       - name: Build backend image
         run: docker build -t backend:ci ./Back-End
 
@@ -64,37 +64,3 @@ jobs:
           npm ci
           npm run test --if-present
           npm run lint --if-present
-    # NOTE: update your package scripts so these commands run real tests/lints;
-    # otherwise they will be skipped or fail.
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - uses: actions/checkout@v4
-
-      # Copy stack files to the target host
-      - name: Upload stack
-      - uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          source: |
-            docker-compose.yml
-            Back-End/**
-            Font-End/**
-          target: ${{ secrets.DEPLOY_PATH }}
-
-      # Restart services with docker-compose.yml (uses the DB & app services you already defined)
-      - name: Deploy via docker compose
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            docker compose down
-            docker compose up -d --build
